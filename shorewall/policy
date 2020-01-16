@@ -1,0 +1,64 @@
+###############################################################################
+#SOURCE		DEST		POLICY		LOG		LIMIT:		CONNLIMIT:
+#						LEVEL		BURST		MASK
+
+#
+# Policies for traffic originating from the local LAN (intrn)
+#
+	#Allow connections from the local network to the internet
+intrn		inet		ACCEPT
+	#Allow connection from the local network to the firewall
+intrn		fw		ACCEPT
+
+#
+# Policies for traffic originating from the firewall fw
+#
+	#Allow the firewall to connect to the internet on it's own, mainly for updates
+fw		inet		ACCEPT
+	#Allow the firewall to access the internal network - primarily for
+fw		intrn		ACCEPT
+
+#
+# Policies for traffic originating from the Internet zone (inet)
+#
+	#Disallow the internet to connect to anything else
+inet		all		REJECT		$LOG
+
+wlctl		intrn		ACCEPT
+intrn		wlctl		ACCEPT
+wlctl		inet		ACCEPT
+fw		wlctl		ACCEPT
+wlctl		fw		ACCEPT
+
+mc		intrn		ACCEPT
+intrn		mc		ACCEPT
+mc		wlgst		ACCEPT
+wlgst		mc		ACCEPT
+
+wlgst		inet		ACCEPT
+wlgst		intrn		ACCEPT
+intrn		wlgst		ACCEPT
+
+intrn		zmman		ACCEPT
+zmman		intrn		ACCEPT
+zmman		inet		ACCEPT
+zmman		ipcam		ACCEPT
+
+intrn		iot		ACCEPT
+
+iotn		iot		ACCEPT
+intrn		iotn		ACCEPT
+iotn		inet		ACCEPT
+
+# This is here to prevent weird routing across the multiple internet connections
+inet		inet		DROP		$LOG
+
+	#Disllow connections to anything else 
+intrn		all		REJECT		$LOG
+
+#
+# This ** REALLY ** needs to be the last line in this file
+#
+all		all		REJECT		$LOG
+
+#LAST LINE -- DO NOT REMOVE

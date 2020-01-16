@@ -1,0 +1,30 @@
+###############################################################################
+#ZONE	TYPE		OPTIONS		IN			OUT
+#					OPTIONS			OPTIONS
+fw	firewall
+
+# Internet
+inet	ipv4
+
+# Internal main network
+intrn	ipv4
+
+# Wireless Guests
+wlgst	ipv4
+
+# Wireless control
+wlctl	ipv4
+
+# Media center things
+mc	ipv4
+
+# IP Cameras
+ipcam	ipv4
+
+# IoT network
+iot	ipv4
+
+# IoT Network zone w/ Internet access (tried to lock down)
+iotn	ipv4
+
+#LAST LINE - ADD YOUR ENTRIES ABOVE THIS ONE - DO NOT REMOVE

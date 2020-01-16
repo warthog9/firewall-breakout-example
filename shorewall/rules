@@ -1,0 +1,150 @@
+####################################################################################################################################################################
+#ACTION		SOURCE		DEST		PROTO	DEST	SOURCE		ORIGINAL	RATE		USER/	MARK	CONNLIMIT	TIME		 HEADERS
+#							PORT	PORT(S)		DEST		LIMIT		GROUP
+#SECTION ALL
+#SECTION ESTABLISHED
+#SECTION RELATED
+#Be sure to add your rules after the line that reads SECTON NEW.
+?SECTION NEW
+
+#
+# External interfaces shouldn't have local addresses
+#
+DROP:$LOG	inet:10.0.0.0/24	any
+
+Ping/ACCEPT	any	any
+Trcrt/ACCEPT	any	any
+
+DNS/ACCEPT	fw	inet
+DNS/ACCEPT	intrn	fw
+DNS/ACCEPT	zmman	fw
+DNS/ACCEPT	zmman	inet
+DNS/ACCEPT	zmman	intrn
+DNS/ACCEPT	ipcam	fw
+DNS/ACCEPT	ipcam	intrn
+DNS/ACCEPT	ipcam	inet
+DNS/ACCEPT	wlgst	fw
+DNS/ACCEPT	wlgst	inet
+DNS/ACCEPT	iot	fw
+DNS/ACCEPT	iotn	fw
+
+NTP/DROP	ipcam	inet
+NTP/ACCEPT	ipcam	fw
+NTP/ACCEPT	zmman	fw
+NTP/ACCEPT	iot	fw
+NTP/ACCEPT	iotn	fw
+REDIRECT	iot	123	udp	123
+REDIRECT	iotn	123	udp	123
+
+mDNSbi/ACCEPT	intrn	fw
+mDNSbi/ACCEPT	fw	intrn
+mDNSbi/ACCEPT	wlgst	fw
+mDNSbi/ACCEPT	fw	wlgst
+mDNSbi/DROP	all	iot
+mDNSbi/DROP	all	iotn
+mDNSbi/DROP	iot	all
+mDNSbi/DROP	iotn	all
+
+ACCEPT		wlgst	fw	udp	3483
+ACCEPT		intrn	fw	udp	3483
+
+ACCEPT		wlgst	fw	udp	3480
+ACCEPT		intrn	fw	udp	3480
+
+ACCEPT		intrn	fw	udp	9999
+ACCEPT		fw	intrn	udp	9999
+ACCEPT		iot	fw	udp	9999
+ACCEPT		fw	iot	udp	9999
+
+ACCEPT		iot	intrn	udp	49451
+
+REJECT		ipcam	all	tcp	8555
+DROP		ipcam	all	tcp	32100
+DROP		ipcam	all	udp	32100
+DROP		ipcam	all	tcp	-	32100
+DROP		ipcam	all	udp	-	32100
+DROP		ipcam	all	tcp	16712
+DROP		ipcam	all	udp	16712
+DROP		ipcam	all	udp	9603
+DROP		ipcam	all	udp	9999
+HTTP/DROP	ipcam	all
+HTTPS/DROP	ipcam	all
+
+Web/ACCEPT		intrn	ipcam
+ACCEPT		intrn	ipcam	tcp	554
+ACCEPT		intrn	ipcam	udp	554
+ACCEPT		intrn	ipcam	tcp	1935
+ACCEPT		intrn	ipcam	tcp	8000
+ACCEPT		intrn	ipcam	udp	8000
+ACCEPT		intrn	ipcam:10.0.11.24	tcp	8899
+ACCEPT		intrn	ipcam:10.0.11.24	tcp	34567
+ACCEPT		intrn	ipcam:10.0.11.24	tcp	8086
+ACCEPT		intrn	ipcam:10.0.11.24	tcp	7999
+ACCEPT		intrn	ipcam	tcp	6484
+ACCEPT		intrn	ipcam	udp	6484
+ACCEPT		intrn	ipcam	tcp	9000
+ACCEPT		intrn	ipcam	udp	9000
+ACCEPT		intrn	ipcam	udp	-	8344
+ACCEPT		intrn	ipcam	udp	-	6970
+ACCEPT		ipcam	intrn	udp	-	6982
+ACCEPT		ipcam	intrn	tcp	-	6982
+ACCEPT		ipcam	intrn	udp	-	6983
+ACCEPT		ipcam	intrn	tcp	-	6983
+ACCEPT		ipcam	intrn	udp	6983
+ACCEPT		ipcam	intrn	tcp	6983
+ACCEPT		ipcam	intrn	udp	-	8483
+ACCEPT		ipcam	intrn	tcp	-	8483
+
+TFTP/ACCEPT	ipcam	fw
+
+ACCEPT		intrn	iot	tcp	9999
+
+
+#I need ntp
+NTP/ACCEPT	fw	any
+NTP/ACCEPT	intrn	any
+
+# Web stuff
+Web/ACCEPT	intrn	inet
+Web/ACCEPT	fw	inet
+
+SSH/ACCEPT	intrn	fw
+
+DROP		intrn:10.0.0.41	inet
+DROP:$LOG	intrn:10.0.1.70	inet
+DROP:$LOG	intrn:10.0.1.71	inet
+
+ACCEPT		iot	intrn:10.0.6.1
+ACCEPT		intrn:10.0.6.1	iot
+
+ACCEPT		iot	intrn:10.0.0.247
+ACCEPT		intrn:10.0.0.247	iot
+
+DROP		iot	all	tcp	8443
+DROP		iot	all	udp	8443
+
+DROP		iot	all	tcp	50443
+DROP		iot	all	udp	50443
+
+# 	Bunch of random pokes at this
+DROP		inet	fw	tcp	35421
+DROP		inet	fw	udp	35421
+
+#	Seriously, just drop http/https at the firewall, not going to allow it to the home network
+HTTP/DROP	inet	fw
+HTTPS/DROP	inet	fw
+
+#Ok these are just things that need to be dropped:
+MySQL/REJECT	inet	any
+CVS/REJECT	inet	any
+Distcc/REJECT	inet	any
+Gnutella/REJECT	inet	any
+LDAP/REJECT	inet	any
+PostgreSQL/REJECT	inet	any
+SMB/REJECT	inet	any
+SMBswat/REJECT	inet	any
+SNMP/REJECT	inet	any
+Webmin/REJECT	inet	any
+REJECT		inet	any			tcp	111
+
+#LAST LINE -- ADD YOUR ENTRIES BEFORE THIS ONE -- DO NOT REMOVE

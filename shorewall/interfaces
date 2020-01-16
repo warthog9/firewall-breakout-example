@@ -1,0 +1,11 @@
+###############################################################################
+#ZONE	INTERFACE	BROADCAST	OPTIONS
+inet	eth0		detect		tcpflags,nosmurfs,optional
+intrn	eth1		-		dhcp,bridge
+wlgst	eth2.3		-		dhcp,tcpflags,nosmurfs,routeback
+wlctl   eth2.5		detect		dhcp,tcpflags,nosmurfs,routeback
+ipcam	eth2.4		detect		dhcp,tcpflags,nosmurfs,routeback
+iot	eth2.8		detect		dhcp,tcpflags,nosmurfs,routeback
+iotn	eth2.9		detect		dhcp,tcpflags,nosmurfs,routeback
+
+#LAST LINE -- ADD YOUR ENTRIES BEFORE THIS ONE -- DO NOT REMOVE

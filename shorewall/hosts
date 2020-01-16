@@ -1,0 +1,4 @@
+###############################################################################
+#ZONE	HOST(S)					OPTIONS
+mc	eth1:224.0.0.0/4				destonly
+#LAST LINE -- ADD YOUR ENTRIES BEFORE THIS LINE -- DO NOT REMOVE

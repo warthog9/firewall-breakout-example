@@ -1,0 +1,4 @@
+############################################################################################
+#NAME	NUMBER	MARK	DUPLICATE	INTERFACE	GATEWAY		OPTIONS		COPY
+ISP	 1	1	-		eth0		1.2.3.4		track,balance
+#LAST LINE -- ADD YOUR ENTRIES ABOVE THIS LINE -- DO NOT REMOVE

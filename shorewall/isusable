@@ -1,0 +1,7 @@
+local status=0
+#
+# Read the status file (if any) created by /etc/lsm/script
+#
+[ -f ${VARDIR}/${1}.status ] && status=$(cat ${VARDIR}/${1}.status)
+
+return $status

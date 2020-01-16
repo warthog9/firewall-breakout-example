@@ -1,0 +1,10 @@
+###############################################################################
+#TYPE			ZONE	GATEWAY		GATEWAY
+#						ZONE
+openvpn:udp:1400	inet	0.0.0.0/0
+openvpn:udp:1401	inet	0.0.0.0/0
+
+# This is here for users who need to get around draconian firewalls that only allow traffic on web ports
+openvpn:tcp:443		inet	0.0.0.0/0
+
+#LAST LINE -- ADD YOUR ENTRIES BEFORE THIS ONE -- DO NOT REMOVE

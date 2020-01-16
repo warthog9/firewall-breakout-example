@@ -1,0 +1,20 @@
+#
+# Shorewall -- /etc/shorewall/blrules
+#
+# For information about entries in this file, type "man shorewall-blrules"
+#
+# Please see http://shorewall.net/blacklisting_support.htm for additional
+# information.
+#
+##############################################################################################################################################################
+#ACTION		SOURCE		DEST		PROTO	DPORT	SPORT	ORIGDEST	RATE	USER	MARK	CONNLIMIT	TIME	HEADERS	SWITCH	HELPER
+#
+DROP		inet:+blacklist		all
+DROP		intrn:+blacklist	all
+DROP		wlgst:+blacklist	all
+DROP		all:+blacklist	all
+
+DROP		inet:+blacklist_temp	all
+DROP		intrn:+blacklist_temp	all
+DROP		wlgst:+blacklist_temp	all
+DROP		all:+blacklist_temp	all

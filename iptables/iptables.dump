@@ -1,0 +1,1402 @@
+Chain INPUT (policy DROP)
+target     prot opt source               destination         
+inet-fw    all  --  anywhere             anywhere            
+intrn-fw   all  --  anywhere             anywhere            
+~comb11    all  --  anywhere             anywhere            
+~comb11    all  --  anywhere             anywhere            
+wlgst-fw   all  --  anywhere             anywhere            
+wlctl-fw   all  --  anywhere             anywhere            
+ipcam-fw   all  --  anywhere             anywhere            
+iot-fw    all  --  anywhere             anywhere            
+iotn-fw   all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:INPUT:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination         
+inet_frwd  all  --  anywhere             anywhere            
+intrn_frwd  all  --  anywhere             anywhere            
+wlgst_frwd  all  --  anywhere             anywhere            
+wlctl_frwd  all  --  anywhere             anywhere            
+ipcam_frwd  all  --  anywhere             anywhere            
+iot_frwd  all  --  anywhere             anywhere            
+iotn_frwd  all  --  anywhere             anywhere            
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:FORWARD:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain OUTPUT (policy DROP)
+target     prot opt source               destination         
+~comb12    all  --  anywhere             anywhere            
+~comb12    all  --  anywhere             anywhere            
+~comb12    all  --  anywhere             anywhere            
+~comb12    all  --  anywhere             anywhere            
+fw-wlgst   all  --  anywhere             anywhere            
+~comb12    all  --  anywhere             anywhere            
+fw-ipcam   all  --  anywhere             anywhere            
+fw-iot    all  --  anywhere             anywhere            
+fw-iotn   all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:OUTPUT:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain Broadcast (67 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type BROADCAST 
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type ANYCAST 
+
+Chain br0_fop (5 references)
+target     prot opt source               destination         
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+tcpflags   tcp  --  anywhere             anywhere            
+
+Chain dynamic (74 references)
+target     prot opt source               destination         
+
+Chain fw-ipcam (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,ntp /* Trcrt, NTP */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:fw-ipcam:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain fw-iot (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports distinct,ntp /* Others and NTP */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:fw-iot:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain fw-iotn (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp /* NTP */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:fw-iotn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain fw-wlgst (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+ACCEPT     udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+ACCEPT     igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp /* NTP */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:fw-wlgst:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-fw (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:openvpn 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:openvpn 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:rsf-1 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:netmagic 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:carrius-rshell 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:https 
+~log0      all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:35421 
+DROP       udp  --  anywhere             anywhere            udp dpt:35421 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-fw:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-intrn (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+~log1      all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+ACCEPT     tcp  --  anywhere             10.0.0.16           tcp dpt:32443 ctorigdstport 32443 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-intrn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-ipcam (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+~log7      all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-ipcam:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-mc (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+~log6      all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-mc:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-iot (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+~log10     all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-iot:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-iotn (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+~log11     all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-iotn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-wlctl (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+~log5      all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-wlctl:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet-wlgst (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+~log4      all  --  10.0.0.0/24          anywhere            [goto] 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports mysql,cvspserver,distcc,gnutella-svc /* MySQL, CVS, Distcc, Gnutella */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:gnutella-svc /* Gnutella */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ldap,postgres /* LDAP, PostgreSQL */ 
+reject     udp  --  anywhere             anywhere            [goto] multiport dports epmap,microsoft-ds /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpts:netbios-ns:netbios-ssn /* SMB */ 
+reject     udp  --  anywhere             anywhere            [goto] udp spt:netbios-ns dpts:1024:65535 /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports epmap,netbios-ssn,microsoft-ds /* SMB */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:swat /* SMBswat */ 
+reject     udp  --  anywhere             anywhere            [goto] udp dpt:snmp /* SNMP */ 
+reject     tcp  --  anywhere             anywhere            [goto] multiport dports ndmp,sunrpc /* Webmin and others */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-wlgst:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain inet_frwd (1 references)
+target     prot opt source               destination         
+inet-intrn  all  --  anywhere             anywhere            
+inet-wlgst  all  --  anywhere             anywhere            
+inet-wlctl  all  --  anywhere             anywhere            
+inet-mc    all  --  anywhere             base-address.mcast.net/4 
+inet-ipcam  all  --  anywhere             anywhere            
+inet-iot  all  --  anywhere             anywhere            
+inet-iotn  all  --  anywhere             anywhere            
+
+Chain intrn-fw (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain intrn-inet (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+br0_fop    all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,ntp /* Trcrt, NTP */ 
+ACCEPT     tcp  --  anywhere             anywhere            multiport dports http,https /* Web */ 
+DROP       all  --  10.0.0.41            anywhere            
+~log12     all  --  10.0.1.70            anywhere            [goto] 
+~log12     all  --  10.0.1.71            anywhere            [goto] 
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain intrn-intrn (1 references)
+target     prot opt source               destination         
+br0_fop    all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain intrn-ipcam (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+br0_fop    all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+ACCEPT     tcp  --  anywhere             anywhere            multiport dports http,https,rtsp /* Web and others */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:rtsp 
+ACCEPT     tcp  --  anywhere             anywhere            multiport dports macromedia-fcs,irdmi 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:irdmi 
+ACCEPT     tcp  --  anywhere             10.0.11.24          multiport dports ospf-lite,34567,d-s-n,irdmi2 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:sun-sr-jms 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:sun-sr-jms 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:cslistener 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:cslistener 
+ACCEPT     udp  --  anywhere             anywhere            udp spt:8344 
+ACCEPT     udp  --  anywhere             anywhere            udp spt:6970 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp /* NTP */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:intrn-ipcam:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain intrn_frwd (1 references)
+target     prot opt source               destination         
+intrn-inet  all  --  anywhere             anywhere            
+intrn-intrn  all  --  anywhere             anywhere            
+~comb0     all  --  anywhere             anywhere            
+~comb0     all  --  anywhere             anywhere            
+~comb0     all  --  anywhere             anywhere            
+~comb0     all  --  anywhere             anywhere            
+~comb0     all  --  anywhere             base-address.mcast.net/4 
+intrn-ipcam  all  --  anywhere             anywhere            
+~comb7     all  --  anywhere             anywhere            
+~comb7     all  --  anywhere             anywhere            
+
+Chain ipcam-fw (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,domain /* Trcrt, DNS */ 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:domain /* DNS */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp /* NTP */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:tftp /* TFTP */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-fw:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam-inet (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,domain /* Trcrt, DNS */ 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:domain /* DNS */ 
+DROP       udp  --  anywhere             anywhere            udp dpt:ntp /* NTP */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-inet:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam-intrn (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,domain /* Trcrt, DNS */ 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:domain /* DNS */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+ACCEPT     udp  --  anywhere             anywhere            udp spt:6982 
+ACCEPT     tcp  --  anywhere             anywhere            tcp spt:6982 
+ACCEPT     udp  --  anywhere             anywhere            udp spt:6983 
+ACCEPT     tcp  --  anywhere             anywhere            tcp spt:6983 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:6983 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:6983 
+ACCEPT     udp  --  anywhere             anywhere            udp spt:8483 
+ACCEPT     tcp  --  anywhere             anywhere            tcp spt:8483 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-intrn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam-mc (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-mc:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam-iot (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-iot:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam-iotn (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-iotn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam-wlctl (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-wlctl:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam-wlgst (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+reject     tcp  --  anywhere             anywhere            [goto] tcp dpt:d-fence 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:32100 
+DROP       udp  --  anywhere             anywhere            udp dpt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp spt:32100 
+DROP       udp  --  anywhere             anywhere            udp spt:32100 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:16712 
+DROP       udp  --  anywhere             anywhere            multiport dports 16712,9603,distinct 
+DROP       tcp  --  anywhere             anywhere            multiport dports http,https /* HTTP, HTTPS */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:ipcam-wlgst:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain ipcam_frwd (1 references)
+target     prot opt source               destination         
+ipcam-inet  all  --  anywhere             anywhere            
+ipcam-intrn  all  --  anywhere             anywhere            
+ipcam-wlgst  all  --  anywhere             anywhere            
+ipcam-wlctl  all  --  anywhere             anywhere            
+ipcam-mc   all  --  anywhere             base-address.mcast.net/4 
+~comb4     all  --  anywhere             anywhere            
+ipcam-iot  all  --  anywhere             anywhere            
+ipcam-iotn  all  --  anywhere             anywhere            
+
+Chain logdrop (0 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere            
+
+Chain logflags (7 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:logflags:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain logreject (0 references)
+target     prot opt source               destination         
+reject     all  --  anywhere             anywhere            
+
+Chain reject (178 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere            ADDRTYPE match src-type BROADCAST 
+DROP       all  --  base-address.mcast.net/4  anywhere            
+DROP       igmp --  anywhere             anywhere            
+REJECT     tcp  --  anywhere             anywhere            reject-with tcp-reset 
+REJECT     udp  --  anywhere             anywhere            reject-with icmp-port-unreachable 
+REJECT     icmp --  anywhere             anywhere            reject-with icmp-host-unreachable 
+REJECT     all  --  anywhere             anywhere            reject-with icmp-host-prohibited 
+
+Chain sfilter (22 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:sfilter:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain sha-lh-3084b13c5445f957e695 (0 references)
+target     prot opt source               destination         
+
+Chain sha-rh-69c2d299f6b60b488654 (0 references)
+target     prot opt source               destination         
+
+Chain iot-fw (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,domain /* Trcrt, DNS */ 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:domain /* DNS */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp /* NTP */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp ctorigdstport 123 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:distinct 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-fw:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot-inet (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-inet:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot-intrn (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:49451 
+ACCEPT     all  --  anywhere             10.0.6.1            
+ACCEPT     all  --  anywhere             10.0.0.247 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-intrn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot-ipcam (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-ipcam:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot-mc (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-mc:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot-iotn (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-iotn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot-wlctl (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-wlctl:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot-wlgst (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:pcsync-https 
+DROP       udp  --  anywhere             anywhere            udp dpt:pcsync-https 
+DROP       tcp  --  anywhere             anywhere            tcp dpt:50443 
+DROP       udp  --  anywhere             anywhere            udp dpt:50443 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iot-wlgst:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iot_frwd (1 references)
+target     prot opt source               destination         
+iot-inet  all  --  anywhere             anywhere            
+iot-intrn  all  --  anywhere             anywhere            
+iot-wlgst  all  --  anywhere             anywhere            
+iot-wlctl  all  --  anywhere             anywhere            
+iot-mc    all  --  anywhere             base-address.mcast.net/4 
+iot-ipcam  all  --  anywhere             anywhere            
+~comb4     all  --  anywhere             anywhere            
+iot-iotn  all  --  anywhere             anywhere            
+
+Chain iotn-fw (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,domain /* Trcrt, DNS */ 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:domain /* DNS */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp /* NTP */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpt:ntp ctorigdstport 123 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iotn-fw:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iotn-inet (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain iotn-intrn (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iotn-intrn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iotn-ipcam (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iotn-ipcam:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iotn-mc (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iotn-mc:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iotn-iot (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain iotn-wlctl (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iotn-wlctl:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iotn-wlgst (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:iotn-wlgst:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain iotn_frwd (1 references)
+target     prot opt source               destination         
+iotn-inet  all  --  anywhere             anywhere            
+iotn-intrn  all  --  anywhere             anywhere            
+iotn-wlgst  all  --  anywhere             anywhere            
+iotn-wlctl  all  --  anywhere             anywhere            
+iotn-mc   all  --  anywhere             base-address.mcast.net/4 
+iotn-ipcam  all  --  anywhere             anywhere            
+iotn-iot  all  --  anywhere             anywhere            
+~comb4     all  --  anywhere             anywhere            
+
+Chain shorewall (0 references)
+target     prot opt source               destination         
+           all  --  anywhere             anywhere            recent: SET name: %CURRENTTIME side: source 
+
+Chain smurflog (2 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:smurfs:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain smurfs (58 references)
+target     prot opt source               destination         
+RETURN     all  --  default              anywhere            
+smurflog   all  --  anywhere             anywhere            [goto] ADDRTYPE match src-type BROADCAST 
+smurflog   all  --  base-address.mcast.net/4  anywhere            [goto] 
+
+Chain tcpflags (74 references)
+target     prot opt source               destination         
+logflags   tcp  --  anywhere             anywhere            [goto] tcp flags:FIN,SYN,RST,PSH,ACK,URG/FIN,PSH,URG 
+logflags   tcp  --  anywhere             anywhere            [goto] tcp flags:FIN,SYN,RST,PSH,ACK,URG/NONE 
+logflags   tcp  --  anywhere             anywhere            [goto] tcp flags:SYN,RST/SYN,RST 
+logflags   tcp  --  anywhere             anywhere            [goto] tcp flags:FIN,RST/FIN,RST 
+logflags   tcp  --  anywhere             anywhere            [goto] tcp flags:FIN,SYN/FIN,SYN 
+logflags   tcp  --  anywhere             anywhere            [goto] tcp flags:FIN,PSH,ACK/FIN,PSH 
+logflags   tcp  --  anywhere             anywhere            [goto] tcp spt:0 flags:FIN,SYN,RST,ACK/SYN 
+
+Chain wlctl-fw (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain wlctl-ipcam (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlctl-ipcam:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlctl-mc (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlctl-mc:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlctl-iot (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlctl-iot:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlctl-iotn (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlctl-iotn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlctl-wlgst (1 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlctl-wlgst:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlctl_frwd (1 references)
+target     prot opt source               destination         
+~comb10    all  --  anywhere             anywhere            
+~comb10    all  --  anywhere             anywhere            
+wlctl-wlgst  all  --  anywhere             anywhere            
+~comb4     all  --  anywhere             anywhere            
+wlctl-mc   all  --  anywhere             base-address.mcast.net/4 
+wlctl-ipcam  all  --  anywhere             anywhere            
+wlctl-iot  all  --  anywhere             anywhere            
+wlctl-iotn  all  --  anywhere             anywhere            
+
+Chain wlgst-fw (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:bootps:bootpc 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports traceroute:33524,domain /* Trcrt, DNS */ 
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:domain /* DNS */ 
+ACCEPT     udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+ACCEPT     igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     udp  --  anywhere             anywhere            multiport dports slim-devices,plethora 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlgst-fw:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlgst-ipcam (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlgst-ipcam:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlgst-iot (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlgst-iot:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlgst-iotn (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlgst-iotn:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlgst-wlctl (1 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+RETURN     all  --  anywhere             base-address.mcast.net/4 
+Broadcast  all  --  anywhere             anywhere            
+DROP       all  --  anywhere             anywhere            ADDRTYPE match dst-type MULTICAST 
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:wlgst-wlctl:REJECT:" 
+reject     all  --  anywhere             anywhere            [goto] 
+
+Chain wlgst_frwd (1 references)
+target     prot opt source               destination         
+~comb3     all  --  anywhere             anywhere            
+~comb3     all  --  anywhere             anywhere            
+~comb4     all  --  anywhere             anywhere            
+wlgst-wlctl  all  --  anywhere             anywhere            
+~comb3     all  --  anywhere             base-address.mcast.net/4 
+wlgst-ipcam  all  --  anywhere             anywhere            
+wlgst-iot  all  --  anywhere             anywhere            
+wlgst-iotn  all  --  anywhere             anywhere            
+
+Chain ~blacklist1 (58 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere            match-set blacklist src 
+DROP       all  --  anywhere             anywhere            match-set blacklist_temp src 
+
+Chain ~blacklist5 (23 references)
+target     prot opt source               destination         
+DROP       all  --  anywhere             anywhere            match-set blacklist src 
+DROP       all  --  anywhere             anywhere            match-set blacklist_temp src 
+
+Chain ~comb0 (5 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+br0_fop    all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb10 (2 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb11 (2 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb12 (5 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb2 (2 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb3 (3 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb4 (5 references)
+target     prot opt source               destination         
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+smurfs     all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb6 (2 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb7 (2 references)
+target     prot opt source               destination         
+~blacklist5  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+br0_fop    all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            ctstate RELATED,ESTABLISHED 
+ACCEPT     icmp --  anywhere             anywhere            icmp echo-request /* Ping */ 
+ACCEPT     udp  --  anywhere             anywhere            udp dpts:traceroute:33524 /* Trcrt */ 
+DROP       udp  --  anywhere             224.0.0.251         udp dpt:mdns /* mDNSbi */ 
+DROP       udp  --  anywhere             anywhere            udp spt:mdns dpts:1024:65535 /* mDNSbi */ 
+DROP       igmp --  anywhere             224.0.0.251         /* mDNSbi */ 
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb8 (2 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~comb9 (3 references)
+target     prot opt source               destination         
+~blacklist1  all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+sfilter    all  --  anywhere             anywhere            [goto] 
+dynamic    all  --  anywhere             anywhere            ctstate INVALID,NEW,UNTRACKED 
+tcpflags   tcp  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere            
+
+Chain ~log0 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-fw:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log1 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-intrn:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log10 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-iot:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log11 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-iotn:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log12 (2 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:intrn-inet:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log4 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-wlgst:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log5 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-wlctl:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log6 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-mc:DROP:" 
+DROP       all  --  anywhere             anywhere            
+
+Chain ~log7 (1 references)
+target     prot opt source               destination         
+NFLOG      all  --  anywhere             anywhere            nflog-prefix "Shorewall:inet-ipcam:DROP:" 
+DROP       all  --  anywhere             anywhere            
